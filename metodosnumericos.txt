@@ -1,0 +1,108 @@
+################### Modelo Stanford e Smith  Y = b0(1-exp(-b1x))#############
+##############################Gradiente######################################
+x<-c(3,5,9,14,20,25,30,35,45,55,65,80)
+Y<-matrix(c(4.9,8.1,16,21.5,27,30.5,34.5,37,43,48,54,60),ncol=1)
+plot(x,Y)
+
+#Valor inicial
+b<-matrix(c(b0<-,b1<-),ncol=1)
+
+iter<-0
+for(b in 1:50){
+iter<-iter+1
+fY<-matrix(b0*(1-exp(-b1*x)),ncol=1)
+X0<-matrix(c(1-exp(-b1*x),x*b0*exp(-b1*x)),ncol=2)
+e<-Y-fY
+SQE<-sum(e^2)
+
+
+lambda<-0
+lambda[1]<-1
+for (i in 2:100){
+lambda[i]<-1/(2^(i-1))
+}
+
+for(i in 1:90){
+c0<-b0
+c1<-b1
+iteraçãoG<-lambda[i]*t(X0)%*%e
+b<-matrix(c(c0<-c0+iteraçãoG[1][1],c1<-c1+iteraçãoG[2][1]),ncol=1)
+fY1<-matrix(c0*(1-exp(-c1*x)),ncol=1)
+X01<-matrix(c(1-exp(-c1*x),x*c0*exp(-c1*x)),ncol=2)
+e1<-Y-fY1
+SSE<-sum(e1^2)
+SSE
+if(SSE<SQE){
+break
+}
+}
+b0<-c0
+b1<-c1
+print(b)
+print(SSE)
+print(iter)
+if (SQE-SSE<(1/1000)) break
+}
+
+
+########## Newton ##########
+library(MASS)
+
+#Valor inicial
+b<-matrix(c(b0<-,b1<-),ncol=1)
+
+iter<-0
+#Newton
+for (b in 1:50){
+iter<-iter+1
+X0<-matrix(c(1-exp(-b1*x),x*b0*exp(-b1*x)),ncol=2)
+fY<-matrix(b0*(1-exp(-b1*x)),ncol=1)
+e<-Y-fY
+SQE<-sum(e^2)
+
+somaeHessiana<-matrix(c(0,0,0,0),ncol=2)
+
+for (i in 1:12){
+eHessiana<-(e[i][1])*matrix(c(0,x[i]*exp(-b1*x[i]),x[i]*exp(-b1*x[i]),
+-(x[i]^2)*b0*exp(-b1*x[i])),ncol=2)
+somaeHessiana<-eHessiana+somaeHessiana
+}
+
+sum(e^2)
+iteraçãoN<-(ginv((t(X0)%*%X0)+somaeHessiana))%*%t(X0)%*%(e)
+b<-matrix(c(b0<-b0+iteraçãoN[1][1],b1<-b1+iteraçãoN[2][1]),ncol=1)
+X0<-matrix(c(1-exp(-b1*x),x*b0*exp(-b1*x)),ncol=2)
+fY<-matrix(b0*(1-exp(-b1*x)),ncol=1)
+e<-Y-fY
+SSE<-sum(e^2)
+print(b)
+print(sum(e^2))
+print(iter)
+if (SQE-SSE<(1/1000)) break
+}
+
+
+########## Gauss-Newton ##########
+#library(MASS)
+
+#Valor inicial
+b<-matrix(c(b0<-,b1<-),ncol=1)
+
+iter<-0
+#Gauss-Newton
+for (b in 1:50){
+iter<-iter+1
+fY<-matrix(b0*(1-exp(-b1*x)),ncol=1)
+e<-Y-fY
+SQE<-sum(e^2)
+X0<-matrix(c(1-exp(-b1*x),x*b0*exp(-b1*x)),ncol=2)
+iteraçãoGN<-ginv(t(X0)%*%X0)%*%t(X0)%*%e
+b<-matrix(c(b0<-b0+iteraçãoGN[1][1],b1<-b1+iteraçãoGN[2][1]),ncol=1)
+fY<-matrix(b0*(1-exp(-b1*x)),ncol=1)
+e<-Y-fY
+SSE<-sum(e^2)
+print(b)
+print(SSE)
+print(iter)
+if (SQE-SSE<(1/1000)) break
+}

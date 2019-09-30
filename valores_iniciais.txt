@@ -1,0 +1,83 @@
+rm(list = ls())
+
+idade<-c(10,20,30,40,50,60,70,80,90,100,103)
+ab<-c(0.0002,0.0038,0.0105,0.0203,0.0308,0.0446,0.0578,0.0724,0.0870,0.1007,0.1063)
+
+library(rpanel) 
+library(lattice)
+library(latticeExtra)
+library(gridBase)
+
+### Logístico ####
+
+nlsajust <- function(panel){
+n0 <- try(nls(ab~a/(1+exp(k*(b-idade))), start=start))                           # valores iniciais
+#mensagem de erro 
+  if(class(n0)=="try-error"){
+    par(usr=c(0, 1, 0,1))
+    text(0.5, 0.5, "Não convergiu!\nAproxime mais.", col="red", cex=2)
+    } else {
+    with(as.list(coef(n0)), curve(a/(1+exp(k*(b-x))), add=TRUE, col=2))    
+    aju[[i]] <<- n0
+    }
+    panel
+    }
+
+vg <- function(panel){
+  start <<- panel[c("a","b","k")]
+  plot(idade,ab)
+  with(start, curve(a/(1+exp(k*(b-x))), add=TRUE, col=2, lty=2))
+  panel
+}
+
+par(mar=c(4.1,4.2,3.1,1))
+da <- c(); start <- list(); aju <- list(); i <- c()
+panel <- rp.control()
+rp.slider(panel, a, 0, 1, initval=0.12, showvalue=TRUE, action=vg)
+rp.slider(panel, b, 0, 100, initval=72, showvalue=TRUE, action=vg)
+rp.slider(panel, k, 0, 1,initval=0.05, showvalue=TRUE, action=vg)
+rp.button(panel, action=nlsajust, title="Ajustar")
+
+start
+
+logis1=nls(ab~a/(1+exp(k*(b-idade))),start=start)
+summary(logis1)
+
+
+
+
+### Gompertz ####
+
+nlsajust <- function(panel){
+n0 <- try(nls(ab~a*exp(-exp(k*(b-idade))), start=start))                           # valores iniciais
+#mensagem de erro 
+  if(class(n0)=="try-error"){
+    par(usr=c(0, 1, 0,1))
+    text(0.5, 0.5, "Não convergiu!\nAproxime mais.", col="red", cex=2)
+    } else {
+    with(as.list(coef(n0)), curve(a*exp(-exp(k*(b-x))), add=TRUE, col=2))    
+    aju[[i]] <<- n0
+    }
+    panel
+    }
+
+vg <- function(panel){
+  start <<- panel[c("a","b","k")]
+  plot(idade,ab)
+  with(start, curve(a*exp(-exp(k*(b-x))), add=TRUE, col=2, lty=2))
+  panel
+}
+
+par(mar=c(4.1,4.2,3.1,1))
+da <- c(); start <- list(); aju <- list(); i <- c()
+panel <- rp.control()
+rp.slider(panel, a, 0, 1, initval=0.12, showvalue=TRUE, action=vg)
+rp.slider(panel, b, 0, 100, initval=72, showvalue=TRUE, action=vg)
+rp.slider(panel, k, 0, 1,initval=0.05, showvalue=TRUE, action=vg)
+rp.button(panel, action=nlsajust, title="Ajustar")
+
+start
+
+gomp1=nls(ab~a*exp(-exp(k*(b-idade))),start=start)
+summary(gomp1)
+
